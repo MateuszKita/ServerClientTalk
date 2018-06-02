@@ -163,7 +163,7 @@ public class ClientTalk extends javax.swing.JFrame {
                         Logger.getLogger(ClientTalk.class.getName()).log(Level.SEVERE, null, ex);
                     }
 
-                    console.append("Client connected to " + sock.getInetAddress() + " on port " + sock.getPort());
+                    console.append("\nClient connected to " + sock.getInetAddress() + " on port " + sock.getPort());
                     this.print = new PrintWriter(sock.getOutputStream(), true);
                     while (true) {
                         brinput = new BufferedReader(new InputStreamReader(System.in));

@@ -3,12 +3,8 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/P:/GitHub/ServerClientTalk/src/server/ReceiveFromClient.java</file>
-            <file>file:/P:/GitHub/ServerClientTalk/src/client/SendToServer.java</file>
-            <file>file:/P:/GitHub/ServerClientTalk/src/server/SendToClient.java</file>
             <file>file:/P:/GitHub/ServerClientTalk/src/client/ClientTalk.java</file>
             <file>file:/P:/GitHub/ServerClientTalk/src/server/ServerTalk.java</file>
-            <file>file:/P:/GitHub/ServerClientTalk/src/client/ReceiveFromServer.java</file>
         </group>
     </open-files>
 </project-private>

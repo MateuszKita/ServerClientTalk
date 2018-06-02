@@ -1,7 +1,9 @@
 package server;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -99,17 +101,23 @@ public class ServerTalk extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void startServerButtonActionPerformed(java.awt.event.ActionEvent evt) throws IOException {
-        ServerSocket serverSocket = new ServerSocket(port);
-        Socket clientSocket = serverSocket.accept();
-        console.append("Received connection from " + clientSocket.getInetAddress() + " on port " + clientSocket.getPort());
+        ServerSocket serverSocket = null;
+        Socket socket = null;
 
-        ReceiveFromClient receive = new ReceiveFromClient(clientSocket);
-        Thread receiveThread = new Thread(receive);
-        receiveThread.start();
+        try {
+            serverSocket = new ServerSocket(port);
+        } catch (IOException e) {
+            e.printStackTrace();
 
-        SendToClient send = new SendToClient(clientSocket);
-        Thread sendThread = new Thread(send);
-        sendThread.start();
+        }
+        while (true) {
+            try {
+                socket = serverSocket.accept();
+            } catch (IOException e) {
+                System.out.println("I/O error: " + e);
+            }
+            new EchoThread(socket).start();
+        }
     }
 
     public static void main(String args[]) {
@@ -184,6 +192,27 @@ public class ServerTalk extends javax.swing.JFrame {
             } catch (IOException ex) {
                 System.out.println(ex.getMessage());
             }
+        }
+    }
+
+    public class EchoThread extends Thread {
+
+        protected Socket clientSocket;
+
+        public EchoThread(Socket clientSocket) {
+            this.clientSocket = clientSocket;
+        }
+
+        public void run() {
+            console.append("\nReceived connection from " + clientSocket.getInetAddress() + " on port " + clientSocket.getPort());
+
+            ReceiveFromClient receive = new ReceiveFromClient(clientSocket);
+            Thread receiveThread = new Thread(receive);
+            receiveThread.start();
+
+            SendToClient send = new SendToClient(clientSocket);
+            Thread sendThread = new Thread(send);
+            sendThread.start();
         }
     }
 

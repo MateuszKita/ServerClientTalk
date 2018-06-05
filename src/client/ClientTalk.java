@@ -13,6 +13,18 @@ import java.util.logging.Logger;
 public class ClientTalk extends javax.swing.JFrame {
 
     public String plusMinusSign = randomPlusMinus();
+    public String valueToSend = "";
+    public Socket sock = null;
+
+    synchronized String getValueToSend() {
+        String i = this.valueToSend;
+        this.valueToSend = "";
+        return i;
+    }
+
+    synchronized void setValueToSend(String value) {
+        this.valueToSend = value;
+    }
 
     public ClientTalk() {
         initComponents();
@@ -41,12 +53,18 @@ public class ClientTalk extends javax.swing.JFrame {
         console = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosed(java.awt.event.WindowEvent evt) {
+                formWindowClosed(evt);
+            }
+        });
 
         jLabel1.setFont(new java.awt.Font("Dialog", 1, 48)); // NOI18N
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel1.setText("Client");
 
         jButton1.setFont(new java.awt.Font("Dialog", 1, 60)); // NOI18N
+        jButton1.setEnabled(false);
         jButton1.setText(plusMinusSign
         );
         jButton1.addActionListener(new java.awt.event.ActionListener() {
@@ -58,6 +76,8 @@ public class ClientTalk extends javax.swing.JFrame {
                 }
             }
         });
+
+        jProgressBar1.setValue(50);
 
         connectButton.setText("Connect");
         connectButton.addActionListener(new java.awt.event.ActionListener() {
@@ -125,16 +145,21 @@ public class ClientTalk extends javax.swing.JFrame {
             receiveThread.start();
         } catch (IOException exception) {
             System.out.println(exception.getMessage());
+            console.append(exception.getMessage());
         }
     }//GEN-LAST:event_connectButtonActionPerformed
 
+    private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
+        try {
+            sock.close();
+        } catch (IOException ex) {
+            Logger.getLogger(ClientTalk.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_formWindowClosed
+
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) throws IOException {
-        if (plusMinusSign == "-") {
-            jProgressBar1.setValue(jProgressBar1.getValue() - 1);
-        }
-        if (plusMinusSign == "+") {
-            jProgressBar1.setValue(jProgressBar1.getValue() + 1);
-        }
+        setValueToSend(this.plusMinusSign);
+        System.out.println(valueToSend);
     }
 
     public static void main(String args[]) {
@@ -145,34 +170,32 @@ public class ClientTalk extends javax.swing.JFrame {
 
     public class SendToServer implements Runnable {
 
-        Socket sock = null;
         PrintWriter print = null;
         BufferedReader brinput = null;
 
-        public SendToServer(Socket sock) {
-            this.sock = sock;
+        public SendToServer(Socket sock2) {
+            sock = sock2;
         }
 
         @Override
         public void run() {
             try {
                 if (sock.isConnected()) {
-                    try {
-                        sleep(100);
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(ClientTalk.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-
                     console.append("\nClient connected to " + sock.getInetAddress() + " on port " + sock.getPort());
                     this.print = new PrintWriter(sock.getOutputStream(), true);
                     while (true) {
+                        System.out.println("działam");
+                        sleep(10);
+                        System.out.println(valueToSend);
                         brinput = new BufferedReader(new InputStreamReader(System.in));
-                        this.print.println(Integer.toString(jProgressBar1.getValue()));
+                        this.print.println(getValueToSend());
                         this.print.flush();
                     }
                 }
             } catch (IOException e) {
                 System.out.println(e.getMessage());
+            } catch (InterruptedException ex) {
+                Logger.getLogger(ClientTalk.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -194,7 +217,6 @@ public class ClientTalk extends javax.swing.JFrame {
                 console.append(recieve.readLine());
                 while ((msgRecieved = recieve.readLine()) != null) {
                     if (jProgressBar1.getValue() != Integer.parseInt(msgRecieved)) {
-                        console.append("\nProgress bar value from server: " + msgRecieved);
                         jProgressBar1.setValue(Integer.parseInt(msgRecieved));
                     }
                     if (jProgressBar1.getValue() != 100 || jProgressBar1.getValue() != 0) {

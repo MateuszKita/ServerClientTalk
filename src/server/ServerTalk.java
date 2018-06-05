@@ -138,23 +138,28 @@ public class ServerTalk extends javax.swing.JFrame {
         @Override
         public void run() {
             try {
-                sleep(100);
-                try {
-                    brBufferedReader = new BufferedReader(new InputStreamReader(this.clientSocket.getInputStream()));
-                    while (true) {
-                        String msgRecieved = brBufferedReader.readLine();
-                        if (progressBar.getValue() != Integer.parseInt(msgRecieved)) {
-                            console.append("\nProgress bar value from client: " + msgRecieved);
-                            progressBar.setValue(Integer.parseInt(msgRecieved));
-                        }
+                brBufferedReader = new BufferedReader(new InputStreamReader(this.clientSocket.getInputStream()));
+                while (true) {
+                    sleep(10);
+                    String msgRecieved = brBufferedReader.readLine();
+                    if (msgRecieved.equals("+")) {
+                        console.append("\nProgress bar value from client: " + msgRecieved);
+                        progressBar.setValue(progressBar.getValue() + 1);
+                        System.out.println(1);
                     }
-
-                } catch (IOException ex) {
-                    System.out.println(ex.getMessage());
+                    if (msgRecieved.equals("-")) {
+                        console.append("\nProgress bar value from client: " + msgRecieved);
+                        progressBar.setValue(progressBar.getValue() - 1);
+                        System.out.println(2);
+                    }
                 }
+
+            } catch (IOException ex) {
+                System.out.println(ex.getMessage());
             } catch (InterruptedException ex) {
                 Logger.getLogger(ServerTalk.class.getName()).log(Level.SEVERE, null, ex);
             }
+
         }
     }
 
@@ -176,21 +181,19 @@ public class ServerTalk extends javax.swing.JFrame {
                     pwPrintWriter.flush();
                 }
                 while (true) {
-
-                    if (progressBar.getValue() == 100 || progressBar.getValue() == 100) {
+                    sleep(10);
+                    if (progressBar.getValue() > 100 || progressBar.getValue() < 0) {
                         console.append("\nTHE END!!");
+                        clientSock.close();
                         break;
                     }
                     pwPrintWriter.println(Integer.toString(progressBar.getValue()));
                     pwPrintWriter.flush();
-                    try {
-                        sleep(120);
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(ServerTalk.class.getName()).log(Level.SEVERE, null, ex);
-                    }
                 }
             } catch (IOException ex) {
                 System.out.println(ex.getMessage());
+            } catch (InterruptedException ex) {
+                Logger.getLogger(ServerTalk.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }

@@ -115,7 +115,7 @@ public class ServerTalk extends javax.swing.JFrame {
             } catch (IOException e) {
                 System.out.println("I/O error: " + e);
             }
-            new EchoThread(publicSocket).start();
+            new MainThread(publicSocket).start();
         }
     }
 
@@ -197,11 +197,11 @@ public class ServerTalk extends javax.swing.JFrame {
         }
     }
 
-    public class EchoThread extends Thread {
+    public class MainThread extends Thread {
 
         protected Socket clientSocket;
 
-        public EchoThread(Socket clientSocket) {
+        public MainThread(Socket clientSocket) {
             this.clientSocket = clientSocket;
         }
 

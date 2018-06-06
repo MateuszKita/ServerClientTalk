@@ -1,9 +1,7 @@
 package server;
 
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -20,6 +18,7 @@ public class ServerTalk extends javax.swing.JFrame {
     }
 
     public int port = 8000;
+    public Socket publicSocket = null;
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -38,6 +37,7 @@ public class ServerTalk extends javax.swing.JFrame {
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel2.setText("Console");
 
+        progressBar.setVisible(false);
         progressBar.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
         progressBar.setValue(50);
         progressBar.setMinimumSize(new java.awt.Dimension(20, 22));
@@ -102,7 +102,6 @@ public class ServerTalk extends javax.swing.JFrame {
 
     private void startServerButtonActionPerformed(java.awt.event.ActionEvent evt) throws IOException {
         ServerSocket serverSocket = null;
-        Socket socket = null;
 
         try {
             serverSocket = new ServerSocket(port);
@@ -112,11 +111,11 @@ public class ServerTalk extends javax.swing.JFrame {
         }
         while (true) {
             try {
-                socket = serverSocket.accept();
+                publicSocket = serverSocket.accept();
             } catch (IOException e) {
                 System.out.println("I/O error: " + e);
             }
-            new EchoThread(socket).start();
+            new EchoThread(publicSocket).start();
         }
     }
 
@@ -145,12 +144,14 @@ public class ServerTalk extends javax.swing.JFrame {
                     if (msgRecieved.equals("+")) {
                         console.append("\nProgress bar value from client: " + msgRecieved);
                         progressBar.setValue(progressBar.getValue() + 1);
-                        System.out.println(1);
                     }
                     if (msgRecieved.equals("-")) {
                         console.append("\nProgress bar value from client: " + msgRecieved);
                         progressBar.setValue(progressBar.getValue() - 1);
-                        System.out.println(2);
+                    }
+                    if (msgRecieved.equals("end")) {
+                        publicSocket.close();
+                        System.exit(0);
                     }
                 }
 
@@ -182,10 +183,8 @@ public class ServerTalk extends javax.swing.JFrame {
                 }
                 while (true) {
                     sleep(10);
-                    if (progressBar.getValue() > 100 || progressBar.getValue() < 0) {
-                        console.append("\nTHE END!!");
-                        clientSock.close();
-                        break;
+                    if (progressBar.getValue() == 100 || progressBar.getValue() == 0) {
+                        pwPrintWriter.println(Integer.toString(progressBar.getValue()));
                     }
                     pwPrintWriter.println(Integer.toString(progressBar.getValue()));
                     pwPrintWriter.flush();

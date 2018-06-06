@@ -159,7 +159,6 @@ public class ClientTalk extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) throws IOException {
         setValueToSend(this.plusMinusSign);
-        System.out.println(valueToSend);
     }
 
     public static void main(String args[]) {
@@ -184,12 +183,13 @@ public class ClientTalk extends javax.swing.JFrame {
                     console.append("\nClient connected to " + sock.getInetAddress() + " on port " + sock.getPort());
                     this.print = new PrintWriter(sock.getOutputStream(), true);
                     while (true) {
-                        System.out.println("działam");
                         sleep(10);
-                        System.out.println(valueToSend);
                         brinput = new BufferedReader(new InputStreamReader(System.in));
                         this.print.println(getValueToSend());
                         this.print.flush();
+                        if (jProgressBar1.getValue() == 100 || jProgressBar1.getValue() == 0) {
+                            this.print.println("end");
+                        }
                     }
                 }
             } catch (IOException e) {
